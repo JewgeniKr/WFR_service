@@ -4,9 +4,9 @@ import os
 from pathlib import Path
 from page_validation import PageValidator, PageClassificator
 import uuid
-
 from fields_finding import FieldFinder
 from text_boxes_finding import TextBoxesFinder
+from text_recognizing import TextRecognition
 
 ROOT_PATH = Path(__file__).resolve().parents[1]
 
@@ -22,9 +22,12 @@ RECOGNITIONS_FOLDER = f'{ROOT_PATH}/{config['ImagePath']['recognitions']}'
 PAGE_VALIDATION_MODEL = f'{ROOT_PATH}/{config['ML_Models']['page_validation_model']}'
 FIELDS_RECOGNITION_MODEL = f'{ROOT_PATH}/{config['ML_Models']['fields_recognition_model']}'
 TEXT_BOXES_MODEL = f'{ROOT_PATH}/{config['ML_Models']['text_boxes_model']}'
+TEXT_RECOGNITION_MODEL = f'{ROOT_PATH}/{config['ML_Models']['text_recognition_model']}'
 
 waybill_field_number_section = config['WaybillFieldNumber']
 WAYBILL_FIELDS_NAMES = {i: waybill_field_number_section[i] for i in waybill_field_number_section}
+
+REC_FIELDS_NUMBERS = config['RecFieldsNumbers']['numbers']
 
 class DocumentParser:
     def __init__(self, input_file_path):
@@ -52,10 +55,10 @@ class DocumentParser:
         # шаг 5: С большей детализацией выбираем уточненные текстовые блоки
         self.find_text_boxes()
 
-        # # шаг 6: Распознаем текст
-        # result = self.recognize_text()
+        # шаг 6: Распознаем текст
+        result = self.recognize_text()
 
-        # return result
+        return result
 
     def create_directories(self):
         # получаем имя файла без расширения
@@ -101,8 +104,17 @@ class DocumentParser:
                 text_boxes_finder.find_text_boxes()
 
     def recognize_text(self):
-        return 1
+        result = {}
 
+        folders = Path(self.file_name_recognition_folder_path).iterdir()
+        for folder_path in folders:
+            if folder_path.is_dir() and self.uid in folder_path.name:
+                text_box_folder = f'{folder_path}/text_boxes'
+                text_rec = TextRecognition(TEXT_RECOGNITION_MODEL, text_box_folder, REC_FIELDS_NUMBERS)
+                text_dict = text_rec.get_text()
+                result[folder_path.name] = text_dict
+
+        return result
 
 if __name__ == '__main__':
     # doc = DocumentParser(f'{ROOT_PATH}/temp/pdf/180.pdf')
@@ -118,11 +130,12 @@ if __name__ == '__main__':
     # ff = FieldFinder(page_val.waybills_list, FIELDS_RECOGNITION_MODEL, RECOGNITIONS_FOLDER, WAYBILL_FIELDS_NAMES)
     # ff.find_fields()
 
-    # # test single document
-    # new_parser = DocumentParser(f'{ROOT_PATH}/temp/pdf/172.pdf')
-    # new_parser.get_text_values()
+    # test single document
+    new_parser = DocumentParser(f'{ROOT_PATH}/temp/pdf/172.pdf')
+    res = new_parser.get_text_values()
+    print(res)
 
-    # test folder with documents
-    for doc in Path(f'{ROOT_PATH}/temp/pdf').rglob('*'):
-        parser = DocumentParser(doc)
-        parser.get_text_values()
+    # # test folder with documents
+    # for doc in Path(f'{ROOT_PATH}/temp/pdf').rglob('*'):
+    #     parser = DocumentParser(doc)
+    #     parser.get_text_values()
