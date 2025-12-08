@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Waybill detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        /* Общая структура страницы */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: start;
+            gap: 20px;
+        }
+        
+        /* Боковая панель с элементами управления */
+        .controls {
+            text-align: left;
+        }
+        
+        /* Панель с миниатюрным изображением */
+        #preview img {
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Эффект увеличения миниатюры при наведении */
+        #preview img:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        
+        /* Кнопка закрытия модального окна */
+        .close {
+            color: rgb(255, 255, 255);
+            font-size: 3rem;
+            line-height: 1;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            cursor: pointer;
+        }
+        
+        /* Карточка изображения в модальном окне */
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    
+<h1>Waybill detection</h1>
+
+<!-- Главный контейнер -->
+<div class="container">
+    <!-- Контрольная панель -->
+    <div class="controls">
+        <form id="uploadForm" enctype="multipart/form-data" method="POST" action="/recognize">
+            <input type="file" id="fileInput" name="uploaded_file" accept="image/*" required /><br><br>
+            <button type="submit">Распознать документ</button>
+        </form>
+    </div>
+
+    <!-- Предпросмотр выбранной миниатюры -->
+    <div id="preview"></div>
+</div>
+
+<!-- Модальное окно для демонстрации увеличенного изображения -->
+<div id="myModal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="fullImg">
+</div>
+
+<script>
+// Обработчик события изменения файла
+document.querySelector('#fileInput').addEventListener('change', function(e){
+    // Получаем выбранный файл
+    let file = e.target.files[0];
+    if(file && file.type.match(/image.*/)) {
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            const previewDiv = document.getElementById("preview");
+            
+            // Удаляем старый контент
+            while(previewDiv.firstChild) {
+                previewDiv.removeChild(previewDiv.firstChild);
+            }
+            
+            // Создаем новую миниатюру
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.style.width = '128px'; // Фиксируем ширину
+            img.style.height = '128px'; // Фиксируем высоту
+            img.alt = 'Preview';
+            img.addEventListener('click', showFullSize);
+            previewDiv.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Открыть модальное окно с большим изображением
+function showFullSize() {
+    const modal = document.getElementById('myModal');
+    const fullImg = document.getElementById('fullImg');
+    fullImg.src = this.src;
+    modal.style.display = 'block';
+}
+
+// Закрыть модальное окно
+const closeBtn = document.querySelector('.close');
+closeBtn.addEventListener('click', () => {
+    document.getElementById('myModal').style.display = 'none';
+});
+
+// Дополнительно закрываем модальное окно при клике вне зоны
+window.onclick = function(event) {
+    if (event.target == document.getElementById('myModal')) {
+        document.getElementById('myModal').style.display = 'none';
+    }
+};
+</script>
+
+</body>
+</html>
