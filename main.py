@@ -1,17 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import os
-
+from infra import other_destination
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'temp/pdf'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-ALLOWED_EXTENSIONS = {'pdf'}
-
-def allowed_file(filename):
-    extension = filename.rsplit('.', 1)[1].lower()
-    return extension in ALLOWED_EXTENSIONS
-
 
 @app.route('/')
 def root():
@@ -29,7 +22,7 @@ def recognize():
         return jsonify({'error': 'No selected file'}), 400
 
     if file:
-        if allowed_file(file.filename):
+        if other_destination.allowed_file(file.filename):
             # Сохраняем файл
             filename = file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -41,7 +34,6 @@ def recognize():
                 'path': file_path
             }), 200
         else: return jsonify({'error': 'Do not allowed file type'}), 400
-
 
 
 if __name__ == '__main__':
