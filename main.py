@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 from infra import other_destination
 from services import document_parsing
+from services.page_validation import PageClassificator
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'temp/pdf'
