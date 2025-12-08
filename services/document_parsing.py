@@ -2,11 +2,11 @@ import configparser
 import fitz
 import os
 from pathlib import Path
-from page_validation import PageValidator, PageClassificator
+from services import page_validation, fields_finding, text_boxes_finding, text_recognizing
 import uuid
-from fields_finding import FieldFinder
-from text_boxes_finding import TextBoxesFinder
-from text_recognizing import TextRecognition
+# from fields_finding import FieldFinder
+# from text_boxes_finding import TextBoxesFinder
+# from text_recognizing import TextRecognition
 
 ROOT_PATH = Path(__file__).resolve().parents[1]
 
@@ -88,11 +88,11 @@ class DocumentParser:
                 images.append(output_file)
 
     def validate_pages(self):
-        page_validator = PageValidator(PAGE_VALIDATION_MODEL, self.uid_validation_folder_path, self.uid)
+        page_validator = page_validation.PageValidator(PAGE_VALIDATION_MODEL, self.uid_validation_folder_path, self.uid)
         self.valid_pages_folder_path = page_validator.validate_images()
 
     def find_fields(self):
-        field_finder = FieldFinder(self.valid_pages_folder_path, FIELDS_RECOGNITION_MODEL, self.file_name_recognition_folder_path, WAYBILL_FIELDS_NAMES)
+        field_finder = fields_finding.FieldFinder(self.valid_pages_folder_path, FIELDS_RECOGNITION_MODEL, self.file_name_recognition_folder_path, WAYBILL_FIELDS_NAMES)
         field_finder.find_fields()
 
     def find_text_boxes(self):
@@ -100,7 +100,7 @@ class DocumentParser:
 
         for folder_path in folders:
             if folder_path.is_dir() and self.uid in folder_path.name:
-                text_boxes_finder = TextBoxesFinder(f'{folder_path}/fields', TEXT_BOXES_MODEL)
+                text_boxes_finder = text_boxes_finding.TextBoxesFinder(f'{folder_path}/fields', TEXT_BOXES_MODEL)
                 text_boxes_finder.find_text_boxes()
 
     def recognize_text(self):
@@ -110,7 +110,7 @@ class DocumentParser:
         for folder_path in folders:
             if folder_path.is_dir() and self.uid in folder_path.name:
                 text_box_folder = f'{folder_path}/text_boxes'
-                text_rec = TextRecognition(TEXT_RECOGNITION_MODEL, text_box_folder, REC_FIELDS_NUMBERS)
+                text_rec = text_recognizing.TextRecognition(TEXT_RECOGNITION_MODEL, text_box_folder, REC_FIELDS_NUMBERS)
                 text_dict = text_rec.get_text()
                 result[folder_path.name] = text_dict
 

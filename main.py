@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from infra import other_destination
+from services import document_parsing
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'temp/pdf'
@@ -28,11 +29,10 @@ def recognize():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            return jsonify({
-                'message': 'File uploaded successfully',
-                'filename': filename,
-                'path': file_path
-            }), 200
+            doc_parser = document_parsing.DocumentParser(file_path)
+            result = doc_parser.get_text_values()
+
+            return jsonify(result), 200
         else: return jsonify({'error': 'Do not allowed file type'}), 400
 
 
