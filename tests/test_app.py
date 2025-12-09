@@ -26,3 +26,11 @@ def test_recognize_empty_filename(client):
     data = json.loads(response.data)
     assert response.status_code == 400
     assert data['error'] == 'No selected file'
+
+def test_recognize_invalid_file_type(client):
+    """Тест загрузки неподдерживаемого типа файла"""
+    data = {'uploaded_file': (io.BytesIO(b'test content'), 'test.txt')}
+    response = client.post('/recognize', data=data)
+    data = json.loads(response.data)
+    assert response.status_code == 400
+    assert 'Do not allowed file type' in data['error']
