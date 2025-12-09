@@ -163,3 +163,35 @@ numbers = 1,2
         # Проверяем
         mock_text_boxes_finder.assert_called_once()
         mock_finder.find_text_boxes.assert_called_once()
+
+    @patch('services.document_parsing.text_recognizing.TextRecognition')
+    @patch('services.document_parsing.Path')
+    def test_recognize_text(self, mock_path, mock_text_recognition, temp_pdf_file):
+        """Тест распознавания текста"""
+        # Мокаем Path
+        mock_folder = MagicMock()
+        mock_folder.is_dir.return_value = True
+        mock_folder.name = 'test_uid_folder'
+        mock_folder.__str__.return_value = '/tmp/test'
+
+        mock_path_obj = MagicMock()
+        mock_path_obj.iterdir.return_value = [mock_folder]
+        mock_path.return_value = mock_path_obj
+
+        # Мокаем TextRecognition
+        mock_rec = MagicMock()
+        mock_rec.get_text.return_value = {'field1': 'value1', 'field2': 'value2'}
+        mock_text_recognition.return_value = mock_rec
+
+        parser = DocumentParser(temp_pdf_file)
+        parser.uid = 'test_uid'
+        parser.file_name_recognition_folder_path = '/tmp/recognition'
+
+        # Вызываем метод
+        result = parser.recognize_text()
+
+        # Проверяем
+        mock_text_recognition.assert_called_once()
+        mock_rec.get_text.assert_called_once()
+        assert 'test_uid_folder' in result
+        assert result['test_uid_folder'] == {'field1': 'value1', 'field2': 'value2'}
