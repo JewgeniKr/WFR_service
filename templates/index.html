@@ -9,7 +9,7 @@
             text-align: center;
             margin-top: 50px;
         }
-        
+
         /* Общая структура страницы */
         .container {
             display: flex;
@@ -17,23 +17,23 @@
             align-items: start;
             gap: 20px;
         }
-        
+
         /* Боковая панель с элементами управления */
         .controls {
             text-align: left;
         }
-        
+
         /* Панель с миниатюрным изображением */
         #preview img {
             cursor: pointer;
             transition: transform 0.3s ease-in-out;
         }
-        
+
         /* Эффект увеличения миниатюры при наведении */
         #preview img:hover {
             transform: scale(1.1);
         }
-        
+
         /* Модальное окно */
         .modal {
             display: none;
@@ -47,7 +47,7 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.7);
         }
-        
+
         /* Кнопка закрытия модального окна */
         .close {
             color: rgb(255, 255, 255);
@@ -58,7 +58,7 @@
             right: 30px;
             cursor: pointer;
         }
-        
+
         /* Карточка изображения в модальном окне */
         .modal-content {
             margin: auto;
@@ -70,7 +70,7 @@
     </style>
 </head>
 <body>
-    
+
 <h1>Waybill detection</h1>
 
 <!-- Главный контейнер -->
@@ -102,12 +102,12 @@ document.querySelector('#fileInput').addEventListener('change', function(e){
         var reader = new FileReader();
         reader.onload = function(event) {
             const previewDiv = document.getElementById("preview");
-            
+
             // Удаляем старый контент
             while(previewDiv.firstChild) {
                 previewDiv.removeChild(previewDiv.firstChild);
             }
-            
+
             // Создаем новую миниатюру
             const img = document.createElement('img');
             img.src = event.target.result;
