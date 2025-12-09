@@ -67,6 +67,24 @@
             transform: translateY(0);
         }
 
+        .btn-clear {
+            background-color: #6c757d;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-clear:hover {
+            background-color: #5c636a;
+            transform: translateY(-1px);
+        }
+
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -103,6 +121,37 @@
             background-color: #1e1e1e;
             border-color: #0d6efd;
             color: #fff;
+        }
+
+        .selected-file-info {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .selected-file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #adb5bd;
         }
 
         .preview-container {
@@ -201,6 +250,16 @@
             .pdf-preview {
                 height: 250px;
             }
+
+            .selected-file-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .file-name {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -218,7 +277,7 @@
                 <!-- Левая колонка: Загрузка файла -->
                 <div class="col-md-6">
                     <form id="uploadForm" enctype="multipart/form-data" method="POST" action="/recognize">
-                        <div class="file-input-wrapper mb-4">
+                        <div class="file-input-wrapper mb-3">
                             <input type="file" id="fileInput" name="uploaded_file" accept=".pdf" required />
                             <label for="fileInput" class="file-input-label">
                                 <div>
@@ -227,6 +286,20 @@
                                     <small class="text-muted">или перетащите файл сюда</small>
                                 </div>
                             </label>
+                        </div>
+
+                        <!-- Информация о выбранном файле -->
+                        <div class="selected-file-info" id="selectedFileInfo">
+                            <div class="selected-file-header">
+                                <div class="file-name">
+                                    <i class="bi bi-file-earmark-pdf-fill text-primary"></i>
+                                    <span id="fileName"></span>
+                                </div>
+                                <button type="button" class="btn-clear" id="clearFileBtn">
+                                    <i class="bi bi-x-circle"></i> Очистить
+                                </button>
+                            </div>
+                            <div class="file-size" id="fileSize"></div>
                         </div>
 
                         <div class="info-text">
@@ -302,6 +375,10 @@
     <script>
         // Элементы DOM
         const fileInput = document.getElementById('fileInput');
+        const selectedFileInfo = document.getElementById('selectedFileInfo');
+        const fileNameSpan = document.getElementById('fileName');
+        const fileSizeSpan = document.getElementById('fileSize');
+        const clearFileBtn = document.getElementById('clearFileBtn');
         const previewPlaceholder = document.getElementById('previewPlaceholder');
         const previewDiv = document.getElementById('preview');
         const pdfPreviewDiv = document.getElementById('pdfPreview');
@@ -315,6 +392,11 @@
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Показываем информацию о выбранном файле
+                fileNameSpan.textContent = file.name;
+                fileSizeSpan.textContent = formatFileSize(file.size);
+                selectedFileInfo.style.display = 'block';
+
                 // Скрываем плейсхолдер предпросмотра
                 previewPlaceholder.style.display = 'none';
                 previewDiv.style.display = 'block';
@@ -338,9 +420,29 @@
                     reader.readAsDataURL(file);
                 }
             } else {
+                // Если файл не выбран, скрываем информацию
+                selectedFileInfo.style.display = 'none';
                 previewPlaceholder.style.display = 'block';
                 previewDiv.style.display = 'none';
             }
+        });
+
+        // Обработчик кнопки очистки файла
+        clearFileBtn.addEventListener('click', function() {
+            // Очищаем поле ввода файла
+            fileInput.value = '';
+
+            // Скрываем информацию о файле
+            selectedFileInfo.style.display = 'none';
+
+            // Восстанавливаем плейсхолдер предпросмотра
+            previewPlaceholder.style.display = 'block';
+            previewDiv.style.display = 'none';
+
+            // Сбрасываем предпросмотр
+            pdfPreviewDiv.innerHTML = '';
+            imagePreviewDiv.style.display = 'none';
+            pdfPreviewDiv.style.display = 'none';
         });
 
         // Функция для рендеринга предпросмотра PDF
