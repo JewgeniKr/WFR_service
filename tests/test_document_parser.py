@@ -59,3 +59,20 @@ numbers = 1,2
         assert parser.file_name_validation_folder_path == ''
         assert parser.uid_validation_folder_path == ''
 
+    @patch('services.document_parsing.configparser.ConfigParser')
+    @patch('services.document_parsing.os.makedirs')
+    def test_create_directories(self, mock_makedirs, mock_configparser, temp_pdf_file):
+        """Тест создания директорий"""
+        # Мокаем configparser
+        mock_config = MagicMock()
+        mock_configparser.return_value = mock_config
+        mock_config.__getitem__.return_value = {'pdf': 'temp/pdf'}
+
+        parser = DocumentParser(temp_pdf_file)
+
+        # Вызываем метод
+        parser.create_directories()
+
+        # Проверяем что makedirs вызывался
+        assert mock_makedirs.called
+
