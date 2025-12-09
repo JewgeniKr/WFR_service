@@ -87,3 +87,9 @@ def test_file_saving(mock_allowed_file, app, client):
         # Проверяем содержимое файла
         with open(file_path, 'rb') as f:
             assert f.read() == file_content
+
+def test_upload_folder_creation(app):
+    """Тест создания папки для загрузок"""
+    import os
+    assert os.path.exists(app.config['UPLOAD_FOLDER'])
+    assert os.path.isdir(app.config['UPLOAD_FOLDER'])
