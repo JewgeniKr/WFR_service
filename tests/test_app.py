@@ -59,3 +59,31 @@ def test_recognize_success(MockDocumentParser, mock_allowed_file, client):
     # Проверяем, что парсер был вызван
     MockDocumentParser.assert_called_once()
     mock_parser.get_text_values.assert_called_once()
+
+@patch('app.other_destination.allowed_file')
+def test_file_saving(mock_allowed_file, app, client):
+    """Тест сохранения файла на диск"""
+    mock_allowed_file.return_value = True
+
+    # Мокаем document_parsing чтобы не зависеть от реальной логики
+    with patch('app.document_parsing.DocumentParser') as MockParser:
+        mock_parser = MagicMock()
+        mock_parser.get_text_values.return_value = {}
+        MockParser.return_value = mock_parser
+
+        # Создаем тестовый файл
+        file_content = b'Test PDF content'
+        data = {'uploaded_file': (io.BytesIO(file_content), 'document.pdf')}
+
+        response = client.post('/recognize', data=data)
+
+        assert response.status_code == 200
+
+        # Проверяем, что файл был сохранен
+        import os
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'document.pdf')
+        assert os.path.exists(file_path)
+
+        # Проверяем содержимое файла
+        with open(file_path, 'rb') as f:
+            assert f.read() == file_content
