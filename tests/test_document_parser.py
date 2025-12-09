@@ -76,3 +76,24 @@ numbers = 1,2
         # Проверяем что makedirs вызывался
         assert mock_makedirs.called
 
+    @patch('services.document_parsing.fitz.open')
+    def test_pdf_to_img(self, mock_fitz_open, temp_pdf_file):
+        """Тест конвертации PDF в изображения"""
+        # Мокаем fitz
+        mock_page = MagicMock()
+        mock_pixmap = MagicMock()
+        mock_page.get_pixmap.return_value = mock_pixmap
+        mock_pixmap.save = MagicMock()
+
+        mock_doc = MagicMock()
+        mock_doc.__enter__.return_value = [mock_page, mock_page]  # Две страницы
+        mock_fitz_open.return_value = mock_doc
+
+        parser = DocumentParser(temp_pdf_file)
+        parser.uid_validation_folder_path = '/tmp/test'
+
+        # Вызываем метод
+        parser.pdf_to_img()
+
+        # Проверяем что save вызывался для каждой страницы
+        assert mock_pixmap.save.call_count == 2
