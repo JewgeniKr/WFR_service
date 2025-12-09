@@ -195,3 +195,32 @@ numbers = 1,2
         mock_rec.get_text.assert_called_once()
         assert 'test_uid_folder' in result
         assert result['test_uid_folder'] == {'field1': 'value1', 'field2': 'value2'}
+
+    @patch('services.document_parsing.DocumentParser.create_directories')
+    @patch('services.document_parsing.DocumentParser.pdf_to_img')
+    @patch('services.document_parsing.DocumentParser.validate_pages')
+    @patch('services.document_parsing.DocumentParser.find_fields')
+    @patch('services.document_parsing.DocumentParser.find_text_boxes')
+    @patch('services.document_parsing.DocumentParser.recognize_text')
+    def test_get_text_values(self, mock_recognize_text, mock_find_text_boxes,
+                             mock_find_fields, mock_validate_pages,
+                             mock_pdf_to_img, mock_create_directories, temp_pdf_file):
+        """Тест основного метода get_text_values"""
+        # Настраиваем моки
+        mock_recognize_text.return_value = {'result': 'test'}
+
+        parser = DocumentParser(temp_pdf_file)
+
+        # Вызываем основной метод
+        result = parser.get_text_values()
+
+        # Проверяем что все методы вызывались в правильном порядке
+        mock_create_directories.assert_called_once()
+        mock_pdf_to_img.assert_called_once()
+        mock_validate_pages.assert_called_once()
+        mock_find_fields.assert_called_once()
+        mock_find_text_boxes.assert_called_once()
+        mock_recognize_text.assert_called_once()
+
+        # Проверяем результат
+        assert result == {'result': 'test'}
