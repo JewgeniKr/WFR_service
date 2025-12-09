@@ -116,3 +116,21 @@ numbers = 1,2
         mock_page_validator.assert_called_once()
         mock_validator.validate_images.assert_called_once()
         assert parser.valid_pages_folder_path == '/tmp/valid_pages'
+
+    @patch('services.document_parsing.fields_finding.FieldFinder')
+    def test_find_fields(self, mock_field_finder, temp_pdf_file):
+        """Тест поиска полей"""
+        # Мокаем FieldFinder
+        mock_finder = MagicMock()
+        mock_field_finder.return_value = mock_finder
+
+        parser = DocumentParser(temp_pdf_file)
+        parser.valid_pages_folder_path = '/tmp/valid_pages'
+        parser.file_name_recognition_folder_path = '/tmp/recognition'
+
+        # Вызываем метод
+        parser.find_fields()
+
+        # Проверяем
+        mock_field_finder.assert_called_once()
+        mock_finder.find_fields.assert_called_once()
