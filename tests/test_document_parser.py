@@ -97,3 +97,22 @@ numbers = 1,2
 
         # Проверяем что save вызывался для каждой страницы
         assert mock_pixmap.save.call_count == 2
+
+    @patch('services.document_parsing.page_validation.PageValidator')
+    def test_validate_pages(self, mock_page_validator, temp_pdf_file):
+        """Тест валидации страниц"""
+        # Мокаем PageValidator
+        mock_validator = MagicMock()
+        mock_validator.validate_images.return_value = '/tmp/valid_pages'
+        mock_page_validator.return_value = mock_validator
+
+        parser = DocumentParser(temp_pdf_file)
+        parser.uid_validation_folder_path = '/tmp/test'
+
+        # Вызываем метод
+        parser.validate_pages()
+
+        # Проверяем
+        mock_page_validator.assert_called_once()
+        mock_validator.validate_images.assert_called_once()
+        assert parser.valid_pages_folder_path == '/tmp/valid_pages'
