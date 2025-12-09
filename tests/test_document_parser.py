@@ -47,3 +47,15 @@ numbers = 1,2
 """
         return config_content
 
+    def test_init(self, temp_pdf_file):
+        """Тест инициализации"""
+        parser = DocumentParser(temp_pdf_file)
+
+        assert parser.input_file_path == temp_pdf_file
+        assert parser.uid is not None
+        assert len(parser.uid) == 36  # Длина UUID
+        assert parser.valid_pages_folder_path == ''
+        assert parser.file_name_recognition_folder_path == ''
+        assert parser.file_name_validation_folder_path == ''
+        assert parser.uid_validation_folder_path == ''
+
