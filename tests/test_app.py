@@ -18,3 +18,11 @@ def test_recognize_no_file(client):
     assert response.status_code == 400
     assert 'error' in data
     assert data['error'] == 'No file part'
+
+def test_recognize_empty_filename(client):
+    """Тест запроса с пустым именем файла"""
+    data = {'uploaded_file': (io.BytesIO(b''), '')}
+    response = client.post('/recognize', data=data)
+    data = json.loads(response.data)
+    assert response.status_code == 400
+    assert data['error'] == 'No selected file'
