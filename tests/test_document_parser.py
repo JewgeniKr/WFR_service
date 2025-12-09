@@ -224,3 +224,12 @@ numbers = 1,2
 
         # Проверяем результат
         assert result == {'result': 'test'}
+
+    def test_uuid_generation(self, temp_pdf_file):
+        """Тест на уникальный UUID"""
+        parser1 = DocumentParser(temp_pdf_file)
+        parser2 = DocumentParser(temp_pdf_file)
+
+        assert parser1.uid != parser2.uid
+        assert len(parser1.uid) == 36
+        assert len(parser2.uid) == 36
