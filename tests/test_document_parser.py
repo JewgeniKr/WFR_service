@@ -134,3 +134,32 @@ numbers = 1,2
         # Проверяем
         mock_field_finder.assert_called_once()
         mock_finder.find_fields.assert_called_once()
+
+    @patch('services.document_parsing.text_boxes_finding.TextBoxesFinder')
+    @patch('services.document_parsing.Path')
+    def test_find_text_boxes(self, mock_path, mock_text_boxes_finder, temp_pdf_file):
+        """Тест поиска текстовых блоков"""
+        # Мокаем Path и его итератор
+        mock_folder = MagicMock()
+        mock_folder.is_dir.return_value = True
+        mock_folder.name = 'test_uid_folder'
+        mock_folder.__str__.return_value = '/tmp/test'
+
+        mock_path_obj = MagicMock()
+        mock_path_obj.iterdir.return_value = [mock_folder]
+        mock_path.return_value = mock_path_obj
+
+        # Мокаем TextBoxesFinder
+        mock_finder = MagicMock()
+        mock_text_boxes_finder.return_value = mock_finder
+
+        parser = DocumentParser(temp_pdf_file)
+        parser.uid = 'test_uid'
+        parser.file_name_recognition_folder_path = '/tmp/recognition'
+
+        # Вызываем метод
+        parser.find_text_boxes()
+
+        # Проверяем
+        mock_text_boxes_finder.assert_called_once()
+        mock_finder.find_text_boxes.assert_called_once()
