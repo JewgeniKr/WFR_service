@@ -34,3 +34,28 @@ def test_recognize_invalid_file_type(client):
     data = json.loads(response.data)
     assert response.status_code == 400
     assert 'Do not allowed file type' in data['error']
+
+@patch('app.other_destination.allowed_file')
+@patch('app.document_parsing.DocumentParser')
+def test_recognize_success(MockDocumentParser, mock_allowed_file, client):
+    """Тест успешной обработки файла"""
+    # Мокаем разрешение файла
+    mock_allowed_file.return_value = True
+
+    # Мокаем DocumentParser
+    mock_parser = MagicMock()
+    mock_parser.get_text_values.return_value = {'text': 'parsed content'}
+    MockDocumentParser.return_value = mock_parser
+
+    # Отправляем файл
+    data = {'uploaded_file': (io.BytesIO(b'PDF content'), 'test.pdf')}
+    response = client.post('/recognize', data=data)
+
+    data = json.loads(response.data)
+    assert response.status_code == 200
+    assert 'text' in data
+    assert data['text'] == 'parsed content'
+
+    # Проверяем, что парсер был вызван
+    MockDocumentParser.assert_called_once()
+    mock_parser.get_text_values.assert_called_once()
