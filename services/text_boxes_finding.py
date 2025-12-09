@@ -52,15 +52,4 @@ class TextBoxesFinder:
                 print(f"Сохранено изображение класса '{class_name}' в {save_path}")
 
 if __name__ == '__main__':
-    import configparser
-
-    ROOT_PATH = Path(__file__).resolve().parents[1]
-
-    config = configparser.ConfigParser()
-    config.read(f'{ROOT_PATH}/settings.ini')
-
-    TEXT_BOXES_MODEL = f'{ROOT_PATH}/{config['ML_Models']['text_boxes_model']}'
-    fields_path = 'C:/_waybill_recognition/prod_1/temp/recognitions/153/c45cefaf-c3fa-4791-8e72-adfc1aa599c3_1/fields'
-
-    text_boxes_finder = TextBoxesFinder(fields_path, TEXT_BOXES_MODEL)
-    text_boxes_finder.find_text_boxes()
+    pass

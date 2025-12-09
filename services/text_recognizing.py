@@ -45,15 +45,4 @@ class TextRecognition:
         return field_name
 
 if __name__ == '__main__':
-    ROOT_PATH = Path(__file__).resolve().parents[1]
-
-    config = configparser.ConfigParser()
-    config.read(f'{ROOT_PATH}/settings.ini')
-    rec_fields_numbers = config['RecFieldsNumbers']['numbers']
-
-    model_path = 'C:/_waybill_recognition/prod_1/models/model_from_pretrained_e250'
-    img_path = 'C:/_waybill_recognition/prod_1/temp/recognitions/172/5b23ce7f-61e8-47d5-8ffc-081d75664b1d_1/text_boxes'
-    tr = TextRecognition(model_path, img_path, rec_fields_numbers)
-    text_dict = tr.get_text()
-
-    print(text_dict)
+    pass

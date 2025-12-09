@@ -107,24 +107,5 @@ class PageValidator:
 
 
 
-# if __name__ == '__main__':
-#     import configparser
-#
-#     config = configparser.ConfigParser()
-#     config.read(f'{ROOT_PATH}/settings.ini')
-#
-#     # пути каталогов для временных файлов хранятся в конфиге
-#     PDF_FOLDER = config['ImagePath']['pdf']
-#     ALL_PAGES_FOLDER = f'{ROOT_PATH}/{config['ImagePath']['all_pages']}'
-#     VALID_PAGES_FOLDER = config['ImagePath']['valid_pages']
-#     FIELDS_FOLDER = config['ImagePath']['fields']
-#     TEXT_BOXES_FOLDER = config['ImagePath']['text_boxes']
-#
-#     # пути к ML моделям хранятся в конфиге
-#     PAGE_VALIDATION_MODEL = f'{ROOT_PATH}/{config['ML_Models']['page_validation_model']}'
-#     FIELDS_RECOGNITION_MODEL = config['ML_Models']['page_validation_model']
-#     TEXT_BOXES_MODEL = config['ML_Models']['page_validation_model']
-#
-#     page_val = PageValidator(PAGE_VALIDATION_MODEL, ALL_PAGES_FOLDER)
-#     page_val.get_waybills_list()
-#     print(page_val.waybills_list)
+if __name__ == '__main__':
+    pass

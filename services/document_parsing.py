@@ -118,25 +118,4 @@ class DocumentParser:
         return result
 
 if __name__ == '__main__':
-    # doc = DocumentParser(f'{ROOT_PATH}/temp/pdf/180.pdf')
-    # doc.create_directories()
-    # doc.pdf_to_img()
-    #
-    # page_val = PageValidator(PAGE_VALIDATION_MODEL, ALL_PAGES_FOLDER)
-    # page_val.get_waybills_list()
-    # wb_list = page_val.waybills_list
-
-    # print(wb_list)
-    #
-    # ff = FieldFinder(page_val.waybills_list, FIELDS_RECOGNITION_MODEL, RECOGNITIONS_FOLDER, WAYBILL_FIELDS_NAMES)
-    # ff.find_fields()
-
-    # test single document
-    new_parser = DocumentParser(f'{ROOT_PATH}/temp/pdf/172.pdf')
-    res = new_parser.get_text_values()
-    print(res)
-
-    # # test folder with documents
-    # for doc in Path(f'{ROOT_PATH}/temp/pdf').rglob('*'):
-    #     parser = DocumentParser(doc)
-    #     parser.get_text_values()
+    pass
