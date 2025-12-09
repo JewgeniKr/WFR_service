@@ -357,7 +357,7 @@
 
                         <div class="info-text">
                             <p><i class="bi bi-check-circle"></i> Поддерживаются только PDF файлы</p>
-<!--                            <p><i class="bi bi-shield-check"></i> Ваши данные защищены и не передаются третьим лицам</p>-->
+                            <p><i class="bi bi-shield-check"></i> Ваши данные защищены и не передаются третьим лицам</p>
                         </div>
 
                         <button type="submit" class="btn-flat mt-3" id="submitBtn">
@@ -452,8 +452,13 @@
         const modalImage = document.getElementById('modalImage');
         const resultsContainer = document.getElementById('resultsContainer');
 
+        // Состояние обработки
+        let isProcessing = false;
+
         // Обработчик изменения файла
         fileInput.addEventListener('change', function(e) {
+            if (isProcessing) return; // Не реагируем на изменения во время обработки
+
             const file = e.target.files[0];
             if (file) {
                 // Показываем информацию о выбранном файле
@@ -485,7 +490,9 @@
                 }
             } else {
                 // Если файл не выбран, скрываем информацию
-                selectedFileInfo.style.display = 'none';
+                if (!isProcessing) { // Не скрываем во время обработки
+                    selectedFileInfo.style.display = 'none';
+                }
                 previewPlaceholder.style.display = 'block';
                 previewDiv.style.display = 'none';
             }
@@ -493,6 +500,8 @@
 
         // Обработчик кнопки очистки файла
         clearFileBtn.addEventListener('click', function() {
+            if (isProcessing) return; // Не позволяем очищать во время обработки
+
             // Очищаем поле ввода файла
             fileInput.value = '';
 
@@ -632,6 +641,7 @@
         // Обработчик drag and drop
         const fileInputLabel = document.querySelector('.file-input-label');
         fileInputLabel.addEventListener('dragover', function(e) {
+            if (isProcessing) return; // Не позволяем перетаскивать во время обработки
             e.preventDefault();
             this.style.backgroundColor = '#2d2d2d';
             this.style.borderColor = '#0d6efd';
@@ -644,6 +654,7 @@
         });
 
         fileInputLabel.addEventListener('drop', function(e) {
+            if (isProcessing) return; // Не позволяем перетаскивать во время обработки
             e.preventDefault();
             this.style.backgroundColor = '';
             this.style.borderColor = '';
@@ -677,6 +688,7 @@
             progressBar.style.width = '0%';
             progressPercentage.textContent = '0%';
             progressText.textContent = 'Отправка файла на сервер...';
+            progressBar.style.backgroundColor = '#0d6efd';
         }
 
         // Обновление прогресса
@@ -726,6 +738,40 @@
             resultsContainer.innerHTML = '';
         }
 
+        // Начать обработку
+        function startProcessing() {
+            isProcessing = true;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Обработка...';
+            clearFileBtn.style.display = 'none'; // Скрываем кнопку очистки
+            fileInput.disabled = true; // Блокируем поле ввода файла
+            fileInputLabel.style.cursor = 'not-allowed'; // Меняем курсор
+            fileInputLabel.style.opacity = '0.7'; // Делаем полупрозрачным
+            progressContainer.style.display = 'block';
+            resetProgress();
+        }
+
+        // Завершить обработку
+        function finishProcessing(success = true) {
+            isProcessing = false;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
+            clearFileBtn.style.display = 'flex'; // Показываем кнопку очистки
+            fileInput.disabled = false; // Разблокируем поле ввода файла
+            fileInputLabel.style.cursor = 'pointer'; // Возвращаем курсор
+            fileInputLabel.style.opacity = '1'; // Возвращаем непрозрачность
+
+            if (success) {
+                // Скрываем прогресс-бар через секунду после успешной обработки
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 1000);
+            } else {
+                // При ошибке скрываем сразу
+                progressContainer.style.display = 'none';
+            }
+        }
+
         // Обработка отправки формы с прогресс-баром
         uploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -742,13 +788,8 @@
                 return;
             }
 
-            // Отключаем кнопку отправки
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Обработка...';
-
-            // Показываем прогресс-бар
-            progressContainer.style.display = 'block';
-            resetProgress();
+            // Начинаем обработку
+            startProcessing();
 
             // Симуляция прогресса загрузки
             updateProgress(10, 'Подготовка файла...');
@@ -787,14 +828,8 @@
                     // Показываем результаты
                     showResults(result);
 
-                    // Восстанавливаем кнопку
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
-
-                    // Скрываем прогресс-бар через секунду
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                    }, 1000);
+                    // Завершаем обработку
+                    finishProcessing(true);
                 }, 500);
 
             } catch (error) {
@@ -808,12 +843,9 @@
                 setTimeout(() => {
                     alert('Произошла ошибка при обработке файла. Пожалуйста, попробуйте еще раз.');
 
-                    // Восстанавливаем интерфейс
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
-                    progressContainer.style.display = 'none';
+                    // Завершаем обработку с ошибкой
+                    finishProcessing(false);
                     resetProgress();
-                    progressBar.style.backgroundColor = '#0d6efd';
                 }, 1000);
             }
         });
