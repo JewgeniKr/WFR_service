@@ -67,6 +67,13 @@
             transform: translateY(0);
         }
 
+        .btn-flat:disabled {
+            background-color: #495057;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .btn-clear {
             background-color: #6c757d;
             border: none;
@@ -154,6 +161,36 @@
             color: #adb5bd;
         }
 
+        .progress-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar-custom {
+            background-color: #0d6efd;
+            border-radius: 4px;
+            height: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #adb5bd;
+        }
+
+        .progress-percentage {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #0d6efd;
+        }
+
         .preview-container {
             background-color: #1e1e1e;
             border-radius: 10px;
@@ -238,6 +275,11 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
+        .results-container {
+            margin-top: 2rem;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 padding: 1rem;
@@ -302,12 +344,23 @@
                             <div class="file-size" id="fileSize"></div>
                         </div>
 
+                        <!-- Прогресс-бар -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-info">
+                                <span class="progress-text" id="progressText">Отправка файла на сервер...</span>
+                                <span class="progress-percentage" id="progressPercentage">0%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressBar" class="progress-bar-custom" role="progressbar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
                         <div class="info-text">
                             <p><i class="bi bi-check-circle"></i> Поддерживаются только PDF файлы</p>
                             <p><i class="bi bi-shield-check"></i> Ваши данные защищены и не передаются третьим лицам</p>
                         </div>
 
-                        <button type="submit" class="btn-flat mt-3">
+                        <button type="submit" class="btn-flat mt-3" id="submitBtn">
                             <i class="bi bi-magic"></i> Распознать документ
                         </button>
                     </form>
@@ -330,6 +383,11 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Контейнер для результатов -->
+            <div class="results-container" id="resultsContainer">
+                <!-- Результаты будут добавлены сюда -->
             </div>
         </div>
     </div>
@@ -379,6 +437,11 @@
         const fileNameSpan = document.getElementById('fileName');
         const fileSizeSpan = document.getElementById('fileSize');
         const clearFileBtn = document.getElementById('clearFileBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressPercentage = document.getElementById('progressPercentage');
         const previewPlaceholder = document.getElementById('previewPlaceholder');
         const previewDiv = document.getElementById('preview');
         const pdfPreviewDiv = document.getElementById('pdfPreview');
@@ -387,6 +450,7 @@
         const uploadForm = document.getElementById('uploadForm');
         const modalPdfPreview = document.getElementById('modalPdfPreview');
         const modalImage = document.getElementById('modalImage');
+        const resultsContainer = document.getElementById('resultsContainer');
 
         // Обработчик изменения файла
         fileInput.addEventListener('change', function(e) {
@@ -443,6 +507,12 @@
             pdfPreviewDiv.innerHTML = '';
             imagePreviewDiv.style.display = 'none';
             pdfPreviewDiv.style.display = 'none';
+
+            // Скрываем прогресс-бар и результаты если они были показаны
+            progressContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            resetProgress();
+            submitBtn.disabled = false;
         });
 
         // Функция для рендеринга предпросмотра PDF
@@ -602,10 +672,65 @@
             modal.show();
         });
 
-        // Обработка отправки формы (сохраняем оригинальную логику)
-        uploadForm.addEventListener('submit', function(e) {
+        // Сброс прогресса
+        function resetProgress() {
+            progressBar.style.width = '0%';
+            progressPercentage.textContent = '0%';
+            progressText.textContent = 'Отправка файла на сервер...';
+        }
+
+        // Обновление прогресса
+        function updateProgress(percentage, text) {
+            progressBar.style.width = percentage + '%';
+            progressPercentage.textContent = Math.round(percentage) + '%';
+            if (text) {
+                progressText.textContent = text;
+            }
+        }
+
+        // Показать результаты
+        function showResults(data) {
+            resultsContainer.innerHTML = `
+                <div class="card-custom p-4">
+                    <h4 class="mb-4 d-flex align-items-center">
+                        <i class="bi bi-card-checklist me-2 text-primary"></i>
+                        Результаты распознавания
+                    </h4>
+
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                        <div>
+                            <strong>Документ успешно обработан!</strong>
+                            <div class="small">Распознано полей: ${Object.keys(data).length}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; color: #e9ecef;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-flat-secondary" onclick="clearResults()">
+                            <i class="bi bi-x-circle me-1"></i> Закрыть результаты
+                        </button>
+                    </div>
+                </div>
+            `;
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Очистить результаты
+        function clearResults() {
+            resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
+        }
+
+        // Обработка отправки формы с прогресс-баром
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
             if (!fileInput.files[0]) {
-                e.preventDefault();
                 alert('Пожалуйста, выберите файл');
                 return;
             }
@@ -613,12 +738,84 @@
             // Проверяем, что файл PDF
             const file = fileInput.files[0];
             if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
-                e.preventDefault();
                 alert('Пожалуйста, выберите PDF файл');
                 return;
             }
 
-            // Форма отправится стандартным способом на /recognize
+            // Отключаем кнопку отправки
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Обработка...';
+
+            // Показываем прогресс-бар
+            progressContainer.style.display = 'block';
+            resetProgress();
+
+            // Симуляция прогресса загрузки
+            updateProgress(10, 'Подготовка файла...');
+
+            try {
+                // Создаем FormData для отправки файла
+                const formData = new FormData();
+                formData.append('uploaded_file', file);
+
+                // Симуляция прогресса отправки
+                setTimeout(() => updateProgress(30, 'Отправка файла на сервер...'), 500);
+                setTimeout(() => updateProgress(50, 'Сервер обрабатывает файл...'), 1000);
+                setTimeout(() => updateProgress(70, 'Распознавание текста...'), 1500);
+                setTimeout(() => updateProgress(90, 'Формирование результатов...'), 2000);
+
+                // Отправляем запрос на сервер
+                const response = await fetch('/recognize', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Обновляем прогресс
+                updateProgress(95, 'Получение ответа от сервера...');
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                // Завершаем прогресс
+                updateProgress(100, 'Обработка завершена!');
+
+                // Ждем немного для отображения 100%
+                setTimeout(() => {
+                    // Показываем результаты
+                    showResults(result);
+
+                    // Восстанавливаем кнопку
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
+
+                    // Скрываем прогресс-бар через секунду
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                    }, 1000);
+                }, 500);
+
+            } catch (error) {
+                console.error('Ошибка при отправке файла:', error);
+
+                // Показываем ошибку
+                updateProgress(0, 'Ошибка при обработке файла');
+                progressBar.style.backgroundColor = '#dc3545';
+
+                // Показываем сообщение об ошибке
+                setTimeout(() => {
+                    alert('Произошла ошибка при обработке файла. Пожалуйста, попробуйте еще раз.');
+
+                    // Восстанавливаем интерфейс
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
+                    progressContainer.style.display = 'none';
+                    resetProgress();
+                    progressBar.style.backgroundColor = '#0d6efd';
+                }, 1000);
+            }
         });
 
         // Инициализация pdf.js
