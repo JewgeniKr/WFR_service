@@ -35,6 +35,7 @@ class DocumentParser:
         self.file_name_recognition_folder_path = ''
         self.file_name_validation_folder_path = ''
         self.uid_validation_folder_path = ''
+        self.waybills_files_paths = []
 
     def get_text_values(self):
 
@@ -92,6 +93,7 @@ class DocumentParser:
     def find_fields(self):
         field_finder = fields_finding.FieldFinder(self.valid_pages_folder_path, FIELDS_RECOGNITION_MODEL, self.file_name_recognition_folder_path, WAYBILL_FIELDS_NAMES)
         field_finder.find_fields()
+        self.waybills_files_paths = field_finder.waybills_files_paths
 
     def find_text_boxes(self):
         folders = Path(self.file_name_recognition_folder_path).iterdir()
@@ -107,12 +109,33 @@ class DocumentParser:
         folders = Path(self.file_name_recognition_folder_path).iterdir()
         for folder_path in folders:
             if folder_path.is_dir() and self.uid in folder_path.name:
-                text_box_folder = f'{folder_path}/text_boxes'
-                text_rec = text_recognizing.TextRecognition(TEXT_RECOGNITION_MODEL, text_box_folder, REC_FIELDS_NUMBERS)
-                text_dict = text_rec.get_text()
-                result[folder_path.name] = text_dict
+                wb_file_name = f'{folder_path.name}.png'
+                wb_file_path = self.find_waybill_path(wb_file_name)
+                img_url = self.get_img_url(wb_file_path)
 
+                text_box_folder = f'{folder_path}/text_boxes'
+                text_rec = text_recognizing.TextRecognition(TEXT_RECOGNITION_MODEL, text_box_folder, REC_FIELDS_NUMBERS, img_url)
+                text_dict = text_rec.get_text()
+
+                result[folder_path.name] = text_dict
         return result
+
+    # поиск файла путевого листа для последующей генерации ссылки на изображение
+    def find_waybill_path(self, wb_file_name):
+        result = [s for s in self.waybills_files_paths if wb_file_name in s]
+        return result[0]
+
+    @staticmethod
+    def get_img_url(wb_file_path):
+        print('это ', wb_file_path.replace('\\', '/'))
+        url_safe = wb_file_path.replace('\\', '/')
+
+        url_safe = url_safe.replace('E:/python-projects/WFR_service/temp/', '')
+        print(url_safe)
+        image_url = f'/waybill/{url_safe}'
+
+        return image_url
+
 
 if __name__ == '__main__':
     pass

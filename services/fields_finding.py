@@ -16,11 +16,14 @@ class FieldFinder:
         self.recognitions_folder_path = recognitions_folder_path
         self.fields_names = fields_names
         self.best_confidence_classes = {}
+        self.waybills_files_paths = []
 
     def find_fields(self):
         print(glob.glob(f'{self.waybills_folder_path}/*.png'))
         for waybill_img_path in glob.glob(f'{self.waybills_folder_path}/*.png'):
-            print(waybill_img_path)
+            # сохраняем все пути к файлам путевых листов в свойство класса
+            # в дальнейшем потребуется выводить ссылку на файл в результирующем json
+            self.waybills_files_paths.append(waybill_img_path)
             file_name_folder = self.create_file_name_folder(waybill_img_path)
             fields_folder = self.create_field_folder(file_name_folder)
             self.recognize_fields(waybill_img_path)

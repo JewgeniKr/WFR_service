@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import os
 from infra import other_destination
 from services import document_parsing
@@ -11,6 +11,28 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 @app.route('/')
 def root():
     return render_template('index.html', title='Главная')
+
+@app.route('/waybill/<path:image_path>')
+def get_temp_image(image_path):
+    """Безопасный endpoint для файлов из временной папки"""
+    # Базовый путь
+    base_temp = 'E:/python-projects/WFR_service/temp'
+
+    # Заменяем слеши для Windows/Linux совместимости
+    safe_path = os.path.join(base_temp, image_path.replace('/', os.sep))
+
+    # Приводим к абсолютному пути для проверки безопасности
+    abs_base = os.path.abspath(base_temp)
+    abs_path = os.path.abspath(safe_path)
+
+    # Проверяем, что путь внутри разрешенной директории
+    if not abs_path.startswith(abs_base):
+        return "Forbidden", 403
+
+    if not os.path.exists(abs_path):
+        return "Not found", 404
+
+    return send_file(abs_path, mimetype='image/png')
 
 @app.route('/recognize', methods=['POST'])
 def recognize():

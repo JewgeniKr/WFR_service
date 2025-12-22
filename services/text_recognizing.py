@@ -5,10 +5,11 @@ import cv2
 import numpy as np
 
 class TextRecognition:
-    def __init__(self, model, image_folder, rec_fields_numbers):
+    def __init__(self, model, image_folder, rec_fields_numbers, waybill_file_path):
         self.model = model
         self.image_folder = image_folder
         self.rec_fields_numbers = rec_fields_numbers
+        self.waybill_file_path = waybill_file_path
 
     def get_text(self):
         rec_text = {}
@@ -19,6 +20,8 @@ class TextRecognition:
         for file in folder:
             file_name = os.path.basename(file)
             field_number = file_name[:file_name.find('_')]
+
+            rec_text['image_url'] = self.waybill_file_path
 
             if field_number in self.rec_fields_numbers:
                 field_name = self.get_field_name(file_name)
@@ -40,11 +43,8 @@ class TextRecognition:
                     for indx in sorted_indices:
                         result_string += classes_names[int(classes[indx])]
 
-                    print(result_string)
-
                 rec_text[field_name] = result_string
 
-        print(rec_text)
         return rec_text
 
     @staticmethod

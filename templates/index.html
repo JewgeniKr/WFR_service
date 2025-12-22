@@ -39,7 +39,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px;
         }
 
         .btn-flat {
@@ -305,34 +305,40 @@
             background: #495057;
         }
 
-        /* Карточка записи */
+        /* Обновленные стили для карточек записей */
         .record-card {
             background: linear-gradient(145deg, #252525, #1e1e1e);
             border: 1px solid #404040;
-            border-radius: 8px;
+            border-radius: 12px;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            min-height: 350px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
 
         .record-card:hover {
             border-color: #6c757d;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             transform: translateY(-2px);
         }
 
-        /* Бейдж с номером записи */
+        /* Бейдж с номером - серый стиль */
         .record-badge {
             background: linear-gradient(135deg, #6c757d, #495057);
-            color: #fff;
-            width: 32px;
-            height: 32px;
+            color: #e9ecef;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);
+            border: 1px solid #5c636a;
+            flex-shrink: 0;
         }
 
         /* ID записи */
@@ -344,45 +350,121 @@
             font-size: 0.85rem;
             line-height: 1.5;
             word-break: break-all;
+            border-radius: 6px;
+            padding: 0.75rem;
+            flex-grow: 1;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
         }
 
-        /* Заголовок карточки */
-        .record-header {
-            border-bottom: 1px solid #404040;
-            padding-bottom: 1rem;
+        /* Изображение документа */
+        .record-image {
+            object-fit: contain;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 100%;
+            max-height: 100%;
         }
 
-        /* Таблица полей */
-        .record-fields .table {
+        .record-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.1);
+        }
+
+        /* Фон для изображения */
+        .col-md-6:last-child {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            position: relative;
+        }
+
+        /* Эффект перекрытия изображением */
+        .col-md-6:last-child::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 0;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(to right, rgba(37, 37, 37, 0.9), transparent);
+            z-index: 1;
+        }
+
+        /* Контейнер для таблицы полей - растягивается на всю высоту */
+        .record-fields {
+            scrollbar-width: thin;
+            scrollbar-color: #404040 #1e1e1e;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Обертка для таблицы */
+        .record-fields-table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Таблица */
+        .record-fields-table {
             margin-bottom: 0;
             background-color: transparent;
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
         }
 
-        .record-fields .table th {
+        .record-fields-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             background-color: #2d2d2d;
-            color: #e9ecef;
+        }
+
+        .record-fields-table th {
+            background-color: #2d2d2d;
+            color: #adb5bd;
             font-weight: 600;
             border-bottom: 2px solid #495057;
-            padding: 0.75rem;
-            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .record-fields .table td {
-            padding: 0.75rem;
+        .record-fields-table td {
+            padding: 0.75rem 1rem;
             border-bottom: 1px solid #404040;
             vertical-align: middle;
-            transition: background-color 0.2s ease;
+            height: 45px;
         }
 
-        .record-fields .table tr:last-child td {
+        .record-fields-table tr:last-child td {
             border-bottom: none;
         }
 
-        /* Строки полей */
+        /* Эффект на строки таблицы */
+        .field-row {
+            transition: all 0.2s ease;
+        }
+
         .field-row:hover {
             background-color: rgba(108, 117, 125, 0.1) !important;
+        }
+
+        .field-row:hover .field-name {
+            color: #dee2e6;
+        }
+
+        .field-row:hover .field-value {
+            color: #fff;
         }
 
         /* Название поля */
@@ -390,6 +472,9 @@
             color: #adb5bd;
             font-weight: 500;
             font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Значение поля */
@@ -397,51 +482,176 @@
             color: #e9ecef;
             font-weight: 500;
             font-size: 0.9rem;
+            word-break: break-word;
         }
 
-        /* Алерт в темном стиле */
-        .alert-info {
-            background-color: rgba(13, 202, 240, 0.1);
-            border-color: rgba(13, 202, 240, 0.3);
-            color: #0dcaf0;
+        /* Градиентная тень между секциями */
+        .record-card > .row {
+            position: relative;
+            height: 100%;
+            min-height: 350px;
         }
 
-        /* Кнопка закрыть */
-        .btn-outline-light {
-            border-color: #adb5bd;
-            color: #adb5bd;
+        .record-card > .row::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            bottom: 10%;
+            width: 1px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                #404040 20%,
+                #404040 80%,
+                transparent 100%);
+            z-index: 1;
+            opacity: 0.7;
         }
 
-        .btn-outline-light:hover {
-            background-color: #adb5bd;
-            border-color: #adb5bd;
-            color: #121212;
+        /* Прокрутка для таблицы */
+        .record-fields-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .record-fields-table-wrapper::-webkit-scrollbar-track {
+            background: #1e1e1e;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .record-fields-table-wrapper::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        .record-fields-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #495057;
         }
 
         /* Адаптивность */
+        @media (max-width: 992px) {
+            .record-card .col-md-6:last-child {
+                height: 350px;
+            }
+
+            .record-card .col-md-6:first-child {
+                height: auto;
+                min-height: 300px;
+            }
+
+            .record-card > .row::after {
+                display: none;
+            }
+
+            .record-card .col-md-6:last-child::before {
+                display: none;
+            }
+
+            .record-fields-table-wrapper {
+                max-height: 300px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .records-container {
-                max-height: 500px;
+            .record-card .row {
+                flex-direction: column;
+            }
+
+            .record-card .col-md-6:first-child,
+            .record-card .col-md-6:last-child {
+                width: 100%;
+            }
+
+            .record-card .col-md-6:last-child {
+                border-top: 1px solid #404040;
+                height: 300px;
+            }
+
+            .record-card .col-md-6:first-child {
+                min-height: 280px;
+                padding-bottom: 1rem;
+            }
+
+            .record-badge {
+                width: 32px;
+                height: 32px;
                 font-size: 0.9rem;
             }
 
+            .record-id {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+
+            .record-fields-table th,
+            .record-fields-table td {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 576px) {
             .record-card {
-                padding: 1rem !important;
+                min-height: 280px;
+            }
+
+            .record-card .col-md-6:last-child {
+                height: 250px;
+            }
+
+            .record-card .col-md-6:first-child {
+                min-height: 250px;
+            }
+
+            .record-fields-table th,
+            .record-fields-table td {
+                padding: 0.5rem 0.6rem;
+                font-size: 0.8rem;
+                height: 40px;
+            }
+
+            .record-badge {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
             }
 
             .record-id {
                 font-size: 0.75rem;
+                padding: 0.4rem;
+                min-height: 28px;
             }
+        }
 
-            .record-fields .table th,
-            .record-fields .table td {
-                padding: 0.5rem;
-            }
+        /* Информация о изображении */
+        .image-info-label {
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem;
+            border-top-right-radius: 8px;
+        }
 
-            .field-name,
-            .field-value {
-                font-size: 0.85rem;
-            }
+        .image-info-label small {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Эффект для ID записи при наведении */
+        .record-id:hover {
+            border-color: #6c757d;
+            background-color: #343a40;
+        }
+
+        /* Удаленный заголовок путевого листа */
+        .record-card h6 {
+            display: none;
+        }
+
+        /* Фиксированная высота для контейнера с ID */
+        .record-header-container {
+            margin-bottom: 1rem;
+            min-height: 50px;
         }
     </style>
 </head>
@@ -547,7 +757,7 @@
         </div>
     </footer>
 
-    <!-- Модальное окно для просмотра изображения -->
+    <!-- Модальное окно для просмотра изображения PDF -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
@@ -558,6 +768,34 @@
                 <div class="modal-body text-center">
                     <div id="modalPdfPreview" style="display: none;"></div>
                     <img id="modalImage" class="img-fluid" style="max-height: 70vh; display: none;" alt="Full size preview">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новое модальное окно для просмотра изображений документов -->
+    <div class="modal fade" id="documentImageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentImageModalLabel">Изображение документа</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="modalLoading" class="d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                        <p class="mt-2">Загрузка изображения...</p>
+                    </div>
+                    <img id="documentFullImage" class="image-full-size d-none" alt="Документ">
+                    <div id="modalError" class="d-none">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Не удалось загрузить изображение</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -590,6 +828,12 @@
         const modalPdfPreview = document.getElementById('modalPdfPreview');
         const modalImage = document.getElementById('modalImage');
         const resultsContainer = document.getElementById('resultsContainer');
+
+        // Элементы нового модального окна
+        const documentImageModal = new bootstrap.Modal(document.getElementById('documentImageModal'));
+        const documentFullImage = document.getElementById('documentFullImage');
+        const modalLoading = document.getElementById('modalLoading');
+        const modalError = document.getElementById('modalError');
 
         // Состояние обработки
         let isProcessing = false;
@@ -839,6 +1083,40 @@
             }
         }
 
+        // Функция для открытия изображения документа в модальном окне
+        async function openDocumentImage(imageUrl) {
+            try {
+                // Показываем состояние загрузки
+                documentFullImage.classList.add('d-none');
+                modalError.classList.add('d-none');
+                modalLoading.classList.remove('d-none');
+
+                // Показываем модальное окно
+                documentImageModal.show();
+
+                // Загружаем изображение
+                const img = new Image();
+                img.onload = function() {
+                    documentFullImage.src = imageUrl;
+                    documentFullImage.classList.remove('d-none');
+                    modalLoading.classList.add('d-none');
+                };
+
+                img.onerror = function() {
+                    modalLoading.classList.add('d-none');
+                    modalError.classList.remove('d-none');
+                    console.error('Не удалось загрузить изображение:', imageUrl);
+                };
+
+                img.src = imageUrl;
+
+            } catch (error) {
+                console.error('Ошибка при открытии изображения:', error);
+                modalLoading.classList.add('d-none');
+                modalError.classList.remove('d-none');
+            }
+        }
+
         // Показать результаты
         function showResults(data) {
             // Скрываем прогресс-бар
@@ -877,34 +1155,71 @@
 
             // Добавляем каждую запись
             Object.entries(data).forEach(([recordId, record], index) => {
+                // Проверяем, есть ли изображение в данных
+                const hasImage = record.image_url || record.image_data || record.document_image;
+
                 // Создаем карточку для записи
                 const recordCard = document.createElement('div');
-                recordCard.className = 'record-card mb-4 p-3';
+                recordCard.className = 'record-card mb-4 p-0 overflow-hidden';
 
-                // Добавляем номер записи и ID
                 recordCard.innerHTML = `
-                    <div class="record-header mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="record-badge me-2">${index + 1}</span>
-                            <h6 class="mb-0 text-light">ID записи:</h6>
-                        </div>
-                        <div class="record-id p-2 rounded">
-                            ${recordId}
-                        </div>
-                    </div>
+                    <div class="row g-0 h-100">
+                        <!-- Левая часть: поля записи -->
+                        <div class="${hasImage ? 'col-md-6' : 'col-12'}">
+                            <div class="p-3 h-100 d-flex flex-column">
+                                <!-- Заголовок с ID записи -->
+                                <div class="record-header-container">
+                                    <div class="d-flex align-items-center">
+                                        <span class="record-badge me-2">${index + 1}</span>
+                                        <div class="record-id">
+                                            ${recordId}
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div class="record-fields">
-                        <table class="table table-sm table-borderless table-dark mb-0">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%;" class="text-light">Поле</th>
-                                    <th style="width: 50%;" class="text-light">Значение</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fieldsTable_${index}">
-                                <!-- Поля будут добавлены здесь -->
-                            </tbody>
-                        </table>
+                                <!-- Таблица полей (растягивается на всю высоту) -->
+                                <div class="record-fields">
+                                    <div class="record-fields-table-wrapper">
+                                        <table class="record-fields-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 45%;" class="text-light">Поле</th>
+                                                    <th style="width: 55%;" class="text-light">Значение</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="fieldsTable_${index}">
+                                                <!-- Поля будут добавлены здесь -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Правая часть: изображение -->
+                        ${hasImage ? `
+                            <div class="col-md-6">
+                                <div class="h-100 position-relative">
+                                    <!-- Изображение документа -->
+                                    <div class="h-100 d-flex align-items-center justify-content-center p-2"
+                                         style="background: linear-gradient(135deg, #0f0f0f, #252525);">
+                                        <img src="${record.image_url || record.image_data || record.document_image}"
+                                             alt="Документ ${index + 1}"
+                                             class="record-image"
+                                             data-image-url="${record.image_url || record.image_data || record.document_image}"
+                                             onclick="window.openDocumentImage('${record.image_url || record.image_data || record.document_image}')">
+                                    </div>
+
+                                    <!-- Информация о изображении -->
+                                    <div class="position-absolute bottom-0 start-0 image-info-label">
+                                        <small class="text-light d-flex align-items-center">
+                                            <i class="bi bi-zoom-in me-1"></i>
+                                            <span>Нажмите для увеличения</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
 
@@ -913,8 +1228,13 @@
                 // Получаем тело таблицы для этой записи
                 const fieldsTableBody = document.getElementById(`fieldsTable_${index}`);
 
-                // Добавляем поля записи
+                // Добавляем поля записи (исключая поля с изображениями)
                 Object.entries(record).forEach(([field, value]) => {
+                    // Пропускаем поля с изображениями, так как они уже отображены отдельно
+                    if (field === 'image_url' || field === 'image_data' || field === 'document_image') {
+                        return;
+                    }
+
                     const row = document.createElement('tr');
                     row.className = 'field-row';
 
@@ -938,6 +1258,15 @@
                     row.appendChild(valueCell);
                     fieldsTableBody.appendChild(row);
                 });
+
+                // Добавляем тень для изображения
+                if (hasImage) {
+                    const imageContainer = recordCard.querySelector('.col-md-6:last-child');
+                    if (imageContainer) {
+                        const imageDiv = imageContainer.querySelector('div[style*="background"]');
+                        imageDiv.style.boxShadow = 'inset 10px 0 20px -10px rgba(0, 0, 0, 0.5)';
+                    }
+                }
             });
 
             // Показываем контейнер с результатами
