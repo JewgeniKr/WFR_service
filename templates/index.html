@@ -280,27 +280,167 @@
             display: none;
         }
 
+        /* Стили для вертикальной таблицы результатов */
+        .records-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .records-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .records-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .records-container::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        .records-container::-webkit-scrollbar-thumb:hover {
+            background: #495057;
+        }
+
+        /* Карточка записи */
+        .record-card {
+            background: linear-gradient(145deg, #252525, #1e1e1e);
+            border: 1px solid #404040;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .record-card:hover {
+            border-color: #6c757d;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Бейдж с номером записи */
+        .record-badge {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ID записи */
+        .record-id {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            color: #adb5bd;
+            font-family: 'SF Mono', 'Roboto Mono', Consolas, monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        /* Заголовок карточки */
+        .record-header {
+            border-bottom: 1px solid #404040;
+            padding-bottom: 1rem;
+        }
+
+        /* Таблица полей */
+        .record-fields .table {
+            margin-bottom: 0;
+            background-color: transparent;
+        }
+
+        .record-fields .table th {
+            background-color: #2d2d2d;
+            color: #e9ecef;
+            font-weight: 600;
+            border-bottom: 2px solid #495057;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .record-fields .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #404040;
+            vertical-align: middle;
+            transition: background-color 0.2s ease;
+        }
+
+        .record-fields .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Строки полей */
+        .field-row:hover {
+            background-color: rgba(108, 117, 125, 0.1) !important;
+        }
+
+        /* Название поля */
+        .field-name {
+            color: #adb5bd;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Значение поля */
+        .field-value {
+            color: #e9ecef;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Алерт в темном стиле */
+        .alert-info {
+            background-color: rgba(13, 202, 240, 0.1);
+            border-color: rgba(13, 202, 240, 0.3);
+            color: #0dcaf0;
+        }
+
+        /* Кнопка закрыть */
+        .btn-outline-light {
+            border-color: #adb5bd;
+            color: #adb5bd;
+        }
+
+        .btn-outline-light:hover {
+            background-color: #adb5bd;
+            border-color: #adb5bd;
+            color: #121212;
+        }
+
+        /* Адаптивность */
         @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
+            .records-container {
+                max-height: 500px;
+                font-size: 0.9rem;
             }
 
-            .preview-container {
-                min-height: 250px;
+            .record-card {
+                padding: 1rem !important;
             }
 
-            .pdf-preview {
-                height: 250px;
+            .record-id {
+                font-size: 0.75rem;
             }
 
-            .selected-file-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
+            .record-fields .table th,
+            .record-fields .table td {
+                padding: 0.5rem;
             }
 
-            .file-name {
-                max-width: 100%;
+            .field-name,
+            .field-value {
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -701,34 +841,112 @@
 
         // Показать результаты
         function showResults(data) {
+            // Скрываем прогресс-бар
+            progressContainer.style.display = 'none';
+
+            // Создаем карточку с результатами
             resultsContainer.innerHTML = `
-                <div class="card-custom p-4">
+                <div class="card-custom p-4 mt-4">
                     <h4 class="mb-4 d-flex align-items-center">
-                        <i class="bi bi-card-checklist me-2 text-primary"></i>
+                        <i class="bi bi-table me-2 text-primary"></i>
                         Результаты распознавания
                     </h4>
 
-                    <div class="alert alert-success d-flex align-items-center">
+                    <div class="alert alert-info d-flex align-items-center mb-4">
                         <i class="bi bi-check-circle-fill me-3 fs-4"></i>
                         <div>
                             <strong>Документ успешно обработан!</strong>
-                            <div class="small">Распознано полей: ${Object.keys(data).length}</div>
+                            <div class="small">Найдено путевых листов: ${Object.keys(data).length}</div>
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; color: #e9ecef;">${JSON.stringify(data, null, 2)}</pre>
+                    <div class="records-container" id="recordsContainer">
+                        <!-- Записи будут вставлены здесь -->
                     </div>
 
                     <div class="mt-4 text-end">
-                        <button type="button" class="btn btn-flat-secondary" onclick="clearResults()">
+                        <button type="button" class="btn btn-outline-light" onclick="clearResults()">
                             <i class="bi bi-x-circle me-1"></i> Закрыть результаты
                         </button>
                     </div>
                 </div>
             `;
+
+            // Получаем контейнер для записей
+            const recordsContainer = document.getElementById('recordsContainer');
+
+            // Добавляем каждую запись
+            Object.entries(data).forEach(([recordId, record], index) => {
+                // Создаем карточку для записи
+                const recordCard = document.createElement('div');
+                recordCard.className = 'record-card mb-4 p-3';
+
+                // Добавляем номер записи и ID
+                recordCard.innerHTML = `
+                    <div class="record-header mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="record-badge me-2">${index + 1}</span>
+                            <h6 class="mb-0 text-light">ID записи:</h6>
+                        </div>
+                        <div class="record-id p-2 rounded">
+                            ${recordId}
+                        </div>
+                    </div>
+
+                    <div class="record-fields">
+                        <table class="table table-sm table-borderless table-dark mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;" class="text-light">Поле</th>
+                                    <th style="width: 50%;" class="text-light">Значение</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fieldsTable_${index}">
+                                <!-- Поля будут добавлены здесь -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                recordsContainer.appendChild(recordCard);
+
+                // Получаем тело таблицы для этой записи
+                const fieldsTableBody = document.getElementById(`fieldsTable_${index}`);
+
+                // Добавляем поля записи
+                Object.entries(record).forEach(([field, value]) => {
+                    const row = document.createElement('tr');
+                    row.className = 'field-row';
+
+                    // Ячейка с названием поля
+                    const fieldCell = document.createElement('td');
+                    fieldCell.textContent = field.replace(/_/g, ' ');
+                    fieldCell.className = 'field-name';
+
+                    // Ячейка со значением
+                    const valueCell = document.createElement('td');
+                    const displayValue = value !== undefined && value !== '' ? value : '—';
+                    valueCell.textContent = displayValue;
+                    valueCell.className = 'field-value';
+
+                    if (displayValue === '—') {
+                        valueCell.classList.add('text-muted');
+                        valueCell.style.fontStyle = 'italic';
+                    }
+
+                    row.appendChild(fieldCell);
+                    row.appendChild(valueCell);
+                    fieldsTableBody.appendChild(row);
+                });
+            });
+
+            // Показываем контейнер с результатами
             resultsContainer.style.display = 'block';
-            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+
+            // Плавная прокрутка к результатам
+            setTimeout(() => {
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         // Очистить результаты

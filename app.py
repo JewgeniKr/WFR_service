@@ -36,6 +36,10 @@ def recognize():
             return jsonify(result), 200
         else: return jsonify({'error': 'Do not allowed file type'}), 400
 
+@app.route('/api/recognize', methods=['POST'])
+def api_recognize():
+    pass
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
