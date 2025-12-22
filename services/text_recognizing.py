@@ -1,38 +1,50 @@
 import os
 from pathlib import Path
-import configparser
-from PIL import Image
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+from ultralytics import YOLO
+import cv2
+import numpy as np
 
 class TextRecognition:
-    def __init__(self, model_folder, image_folder, rec_fields_numbers):
-        self.model_folder = model_folder
+    def __init__(self, model, image_folder, rec_fields_numbers):
+        self.model = model
         self.image_folder = image_folder
         self.rec_fields_numbers = rec_fields_numbers
 
     def get_text(self):
         rec_text = {}
 
-        # загрузка модели и процессора
-        processor = TrOCRProcessor.from_pretrained(self.model_folder)
-        model = VisionEncoderDecoderModel.from_pretrained(self.model_folder)
-
+        yolo_model = YOLO(self.model)
         folder = Path(self.image_folder).iterdir()
+
         for file in folder:
             file_name = os.path.basename(file)
             field_number = file_name[:file_name.find('_')]
 
             if field_number in self.rec_fields_numbers:
                 field_name = self.get_field_name(file_name)
-                image = Image.open(file).convert("RGB")
+                image = cv2.imread(str(file))
 
-                # генерация предсказаний
-                pixel_values = processor(images=image, return_tensors="pt").pixel_values
-                generated_ids = model.generate(pixel_values)
-                predicted_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+                # Предсказание
+                results = yolo_model(image, imgsz=640, iou=0.4, conf=0.5, verbose=True)[0]
 
-                rec_text[field_name] = predicted_text
+                classes = results.boxes.cls.cpu().numpy()
+                boxes = results.boxes.xyxy.cpu().numpy().astype(np.int32)
 
+                classes_names = results.names
+                result_string = ''
+
+                if len(boxes) > 0:
+                    # Сортируем индексы по левой границе
+                    sorted_indices = boxes[:, 0].argsort()
+
+                    for indx in sorted_indices:
+                        result_string += classes_names[int(classes[indx])]
+
+                    print(result_string)
+
+                rec_text[field_name] = result_string
+
+        print(rec_text)
         return rec_text
 
     @staticmethod
