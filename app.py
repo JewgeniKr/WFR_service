@@ -1,28 +1,34 @@
 from flask import Flask, render_template, request, jsonify, send_file
+import configparser
 import os
 from infra import other_destination
 from services import document_parsing
 from services.page_validation import PageClassificator
 
+config = configparser.ConfigParser()
+config.read(f'settings.ini')
+
+TEMP_FOLDER = config['ImagePath']['temp']
+PDF_FOLDER = config['ImagePath']['pdf']
+
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'temp/pdf'
+app.config['UPLOAD_FOLDER'] = PDF_FOLDER
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 
 @app.route('/')
 def root():
     return render_template('index.html', title='Главная')
 
+
 @app.route('/waybill/<path:image_path>')
 def get_temp_image(image_path):
     """Безопасный endpoint для файлов из временной папки"""
-    # Базовый путь
-    base_temp = 'E:/python-projects/WFR_service/temp'
-
-    # Заменяем слеши для Windows/Linux совместимости
-    safe_path = os.path.join(base_temp, image_path.replace('/', os.sep))
+    # Заменяем слэши для Windows/Linux совместимости
+    safe_path = os.path.join(TEMP_FOLDER, image_path.replace('/', os.sep))
 
     # Приводим к абсолютному пути для проверки безопасности
-    abs_base = os.path.abspath(base_temp)
+    abs_base = os.path.abspath(TEMP_FOLDER)
     abs_path = os.path.abspath(safe_path)
 
     # Проверяем, что путь внутри разрешенной директории
@@ -33,6 +39,7 @@ def get_temp_image(image_path):
         return "Not found", 404
 
     return send_file(abs_path, mimetype='image/png')
+
 
 @app.route('/recognize', methods=['POST'])
 def recognize():
@@ -56,7 +63,9 @@ def recognize():
             result = doc_parser.get_text_values()
 
             return jsonify(result), 200
-        else: return jsonify({'error': 'Do not allowed file type'}), 400
+        else:
+            return jsonify({'error': 'Do not allowed file type'}), 400
+
 
 @app.route('/api/recognize', methods=['POST'])
 def api_recognize():

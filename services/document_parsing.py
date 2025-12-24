@@ -127,15 +127,12 @@ class DocumentParser:
 
     @staticmethod
     def get_img_url(wb_file_path):
-        print('это ', wb_file_path.replace('\\', '/'))
-        url_safe = wb_file_path.replace('\\', '/')
+        uni_pile_path = wb_file_path.replace('\\', '/')
+        url_safe = uni_pile_path.split('temp')[1]
 
-        url_safe = url_safe.replace('E:/python-projects/WFR_service/temp/', '')
-        print(url_safe)
-        image_url = f'/waybill/{url_safe}'
+        image_url = f'/waybill{url_safe}'
 
         return image_url
-
 
 if __name__ == '__main__':
     pass
