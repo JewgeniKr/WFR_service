@@ -4,6 +4,7 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
+
 class TextRecognition:
     def __init__(self, model, image_folder, rec_fields_numbers, waybill_file_path):
         self.model = model
@@ -17,11 +18,11 @@ class TextRecognition:
         yolo_model = YOLO(self.model)
         folder = Path(self.image_folder).iterdir()
 
+        rec_text['image_url'] = self.waybill_file_path
+
         for file in folder:
             file_name = os.path.basename(file)
             field_number = file_name[:file_name.find('_')]
-
-            rec_text['image_url'] = self.waybill_file_path
 
             if field_number in self.rec_fields_numbers:
                 field_name = self.get_field_name(file_name)
@@ -44,8 +45,18 @@ class TextRecognition:
                         result_string += classes_names[int(classes[indx])]
 
                 rec_text[field_name] = result_string
+                rec_text[f'{field_name}_image'] = self.get_img_url(str(file))
 
         return rec_text
+
+    @staticmethod
+    def get_img_url(file_path):
+        uni_file_path = file_path.replace('\\', '/')
+        url_safe = uni_file_path.split('temp')[1]
+
+        image_url = f'/field_name{url_safe}'
+
+        return image_url
 
     @staticmethod
     def get_field_name(file_name):
@@ -55,6 +66,7 @@ class TextRecognition:
         field_name = file_name[first_symbol:last_symbol]
 
         return field_name
+
 
 if __name__ == '__main__':
     pass

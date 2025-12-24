@@ -41,6 +41,26 @@ def get_temp_image(image_path):
     return send_file(abs_path, mimetype='image/png')
 
 
+@app.route('/field_name/<path:image_path>')
+def get_field_image(image_path):
+    """Безопасный endpoint для файлов из временной папки"""
+    # Заменяем слэши для Windows/Linux совместимости
+    safe_path = os.path.join(TEMP_FOLDER, image_path.replace('/', os.sep))
+
+    # Приводим к абсолютному пути для проверки безопасности
+    abs_base = os.path.abspath(TEMP_FOLDER)
+    abs_path = os.path.abspath(safe_path)
+
+    # Проверяем, что путь внутри разрешенной директории
+    if not abs_path.startswith(abs_base):
+        return "Forbidden", 403
+
+    if not os.path.exists(abs_path):
+        return "Not found", 404
+
+    return send_file(abs_path, mimetype='image/png')
+
+
 @app.route('/recognize', methods=['POST'])
 def recognize():
     if 'uploaded_file' not in request.files:
