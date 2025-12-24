@@ -273,6 +273,7 @@
             max-height: 300px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
         }
 
         .results-container {
@@ -653,6 +654,16 @@
             margin-bottom: 1rem;
             min-height: 50px;
         }
+
+        /* Для состояния обработки - не блокируем предпросмотр */
+        .processing .file-input-label {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .processing .file-input-wrapper input[type=file] {
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -837,11 +848,11 @@
 
         // Состояние обработки
         let isProcessing = false;
+        let currentPdfFile = null;
+        let currentPdfCanvas = null;
 
         // Обработчик изменения файла
         fileInput.addEventListener('change', function(e) {
-            if (isProcessing) return; // Не реагируем на изменения во время обработки
-
             const file = e.target.files[0];
             if (file) {
                 // Показываем информацию о выбранном файле
@@ -858,6 +869,9 @@
                 imagePreviewDiv.style.display = 'none';
                 pdfPreviewDiv.style.display = 'none';
 
+                // Сохраняем текущий файл для предпросмотра
+                currentPdfFile = file;
+
                 // Для PDF файлов создаем предпросмотр с помощью pdf.js
                 if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
                     pdfPreviewDiv.style.display = 'block';
@@ -873,18 +887,16 @@
                 }
             } else {
                 // Если файл не выбран, скрываем информацию
-                if (!isProcessing) { // Не скрываем во время обработки
-                    selectedFileInfo.style.display = 'none';
-                }
+                selectedFileInfo.style.display = 'none';
                 previewPlaceholder.style.display = 'block';
                 previewDiv.style.display = 'none';
+                currentPdfFile = null;
+                currentPdfCanvas = null;
             }
         });
 
         // Обработчик кнопки очистки файла
         clearFileBtn.addEventListener('click', function() {
-            if (isProcessing) return; // Не позволяем очищать во время обработки
-
             // Очищаем поле ввода файла
             fileInput.value = '';
 
@@ -904,7 +916,13 @@
             progressContainer.style.display = 'none';
             resultsContainer.style.display = 'none';
             resetProgress();
-            submitBtn.disabled = false;
+
+            // Сбрасываем состояние
+            currentPdfFile = null;
+            currentPdfCanvas = null;
+
+            // Убираем класс обработки
+            document.body.classList.remove('processing');
         });
 
         // Функция для рендеринга предпросмотра PDF
@@ -946,10 +964,13 @@
                 container.innerHTML = '';
                 container.appendChild(canvas);
 
+                // Сохраняем canvas для использования в модальном окне
+                currentPdfCanvas = canvas;
+
                 // Добавляем обработчик клика для открытия в модальном окне
                 canvas.style.cursor = 'pointer';
-                canvas.addEventListener('click', async () => {
-                    await openPdfInModal(file);
+                canvas.addEventListener('click', () => {
+                    openPdfInModal(canvas);
                 });
 
             } catch (error) {
@@ -963,59 +984,39 @@
             }
         }
 
-        // Функция для открытия PDF в модальном окне
-        async function openPdfInModal(file) {
+        // Функция для открытия PDF в модальном окне (используем сохраненный canvas)
+        function openPdfInModal(canvas) {
             try {
-                modalPdfPreview.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Загрузка...</p></div>';
+                // Очищаем предыдущий контент
+                modalPdfPreview.innerHTML = '';
                 modalPdfPreview.style.display = 'block';
                 modalImage.style.display = 'none';
 
+                // Клонируем canvas для модального окна
+                const modalCanvas = document.createElement('canvas');
+                modalCanvas.width = canvas.width;
+                modalCanvas.height = canvas.height;
+                modalCanvas.style.maxHeight = '70vh';
+                modalCanvas.style.maxWidth = '100%';
+                modalCanvas.style.objectFit = 'contain';
+
+                // Копируем содержимое canvas
+                const context = modalCanvas.getContext('2d');
+                context.drawImage(canvas, 0, 0);
+
+                // Добавляем в модальное окно
+                modalPdfPreview.appendChild(modalCanvas);
+
+                // Показываем модальное окно
                 const modal = new bootstrap.Modal(document.getElementById('imageModal'));
                 modal.show();
-
-                // Конвертируем файл в ArrayBuffer
-                const arrayBuffer = await file.arrayBuffer();
-
-                // Загружаем PDF документ
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-                const pdf = await loadingTask.promise;
-
-                // Получаем первую страницу
-                const page = await pdf.getPage(1);
-
-                // Устанавливаем масштаб для модального окна
-                const scale = 2.0;
-                const viewport = page.getViewport({ scale: scale });
-
-                // Создаем canvas для модального окна
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-
-                // Устанавливаем размеры canvas
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                canvas.style.maxHeight = '70vh';
-                canvas.style.maxWidth = '100%';
-                canvas.style.objectFit = 'contain';
-
-                // Рендерим страницу на canvas
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-
-                await page.render(renderContext).promise;
-
-                // Обновляем содержимое модального окна
-                modalPdfPreview.innerHTML = '';
-                modalPdfPreview.appendChild(canvas);
 
             } catch (error) {
                 console.error('Ошибка при открытии PDF:', error);
                 modalPdfPreview.innerHTML = `
                     <div class="text-center text-muted py-5">
                         <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 2rem;"></i>
-                        <p class="mt-2">Не удалось загрузить PDF файл</p>
+                        <p class="mt-2">Не удалось открыть предпросмотр PDF</p>
                     </div>
                 `;
             }
@@ -1024,7 +1025,6 @@
         // Обработчик drag and drop
         const fileInputLabel = document.querySelector('.file-input-label');
         fileInputLabel.addEventListener('dragover', function(e) {
-            if (isProcessing) return; // Не позволяем перетаскивать во время обработки
             e.preventDefault();
             this.style.backgroundColor = '#2d2d2d';
             this.style.borderColor = '#0d6efd';
@@ -1037,7 +1037,6 @@
         });
 
         fileInputLabel.addEventListener('drop', function(e) {
-            if (isProcessing) return; // Не позволяем перетаскивать во время обработки
             e.preventDefault();
             this.style.backgroundColor = '';
             this.style.borderColor = '';
@@ -1207,7 +1206,7 @@
                                              alt="Документ ${index + 1}"
                                              class="record-image"
                                              data-image-url="${record.image_url || record.image_data || record.document_image}"
-                                             onclick="window.openDocumentImage('${record.image_url || record.image_data || record.document_image}')">
+                                             onclick="openDocumentImage('${record.image_url || record.image_data || record.document_image}')">
                                     </div>
 
                                     <!-- Информация о изображении -->
@@ -1289,10 +1288,8 @@
             isProcessing = true;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Обработка...';
-            clearFileBtn.style.display = 'none'; // Скрываем кнопку очистки
-            fileInput.disabled = true; // Блокируем поле ввода файла
-            fileInputLabel.style.cursor = 'not-allowed'; // Меняем курсор
-            fileInputLabel.style.opacity = '0.7'; // Делаем полупрозрачным
+            clearFileBtn.disabled = true; // Делаем кнопку очистки неактивной
+            document.body.classList.add('processing'); // Добавляем класс для стилей
             progressContainer.style.display = 'block';
             resetProgress();
         }
@@ -1302,10 +1299,8 @@
             isProcessing = false;
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-magic"></i> Распознать документ';
-            clearFileBtn.style.display = 'flex'; // Показываем кнопку очистки
-            fileInput.disabled = false; // Разблокируем поле ввода файла
-            fileInputLabel.style.cursor = 'pointer'; // Возвращаем курсор
-            fileInputLabel.style.opacity = '1'; // Возвращаем непрозрачность
+            clearFileBtn.disabled = false; // Возвращаем активность кнопке очистки
+            document.body.classList.remove('processing'); // Убираем класс обработки
 
             if (success) {
                 // Скрываем прогресс-бар через секунду после успешной обработки
@@ -1395,6 +1390,10 @@
                 }, 1000);
             }
         });
+
+        // Делаем функции глобально доступными для onclick
+        window.openDocumentImage = openDocumentImage;
+        window.clearResults = clearResults;
 
         // Инициализация pdf.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
