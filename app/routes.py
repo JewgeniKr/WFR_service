@@ -1,11 +1,9 @@
-from app import app, db
-from app.db_models import Image, ImageType
-
+from app import app
 from flask import Flask, render_template, request, jsonify, send_file
 import configparser
 import os
 from infra import other_destination
-from services import document_parsing
+from services import document_parsing, db_actions
 
 config = configparser.ConfigParser()
 config.read(f'settings.ini')
@@ -80,7 +78,7 @@ def recognize():
             file.save(file_path)
 
             # сохраняем в БД
-            save_image(file_path, 1)
+            db_actions.save_image(file_path, 1)
 
             doc_parser = document_parsing.DocumentParser(file_path)
             result = doc_parser.get_text_values()
@@ -117,7 +115,7 @@ def api_recognize():
         file.save(file_path)
 
         # сохраняем в БД
-        save_image(file_path, 1)
+        db_actions.save_image(file_path, 1)
 
     except Exception as e:
         app.logger.error(f"Error in API endpoint: {str(e)}")
@@ -125,23 +123,3 @@ def api_recognize():
             'status': 'error',
             'error': f'Internal server error: {str(e)}'
         }), 500
-
-def save_image(img_path, img_type_code):
-    clear_img_address = img_path.replace('\\', '/')
-    # создаем экземпляр изображения
-    new_image = Image(name=os.path.basename(img_path),
-                      image_type_id=img_type_code,
-                      address=clear_img_address)
-
-    try:
-        # Добавляем в сессию и сохраняем
-        db.session.add(new_image)
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        print(e)
-
-
-
-
