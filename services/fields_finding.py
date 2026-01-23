@@ -3,6 +3,7 @@ import cv2
 import glob
 import os
 from ultralytics import YOLO
+from services import db_actions
 
 # структура для записи файла вырезанного класса на диск
 WriteStructure = namedtuple('WriteStructure', ['confidence', 'image'])
@@ -94,12 +95,13 @@ class FieldFinder:
 
     def save_files(self, fields_folder):
         for class_name, write_structure in self.best_confidence_classes.items():
+
             # Сохраняем вырезанное изображение
             class_field_number = self.fields_names[class_name]
             output_path = f"{fields_folder}/{class_field_number}_{class_name}_conf_{write_structure.confidence:.2f}.jpg"
             cv2.imwrite(output_path, write_structure.image)
 
-        print(f"Сохранено {len(self.best_confidence_classes)} объектов в папку {fields_folder}")
+            # Сохранение адреса изображения в БД
+            db_actions.save_image(output_path, 4)
 
-if __name__ == '__main__':
-    pass
+        print(f"Сохранено {len(self.best_confidence_classes)} объектов в папку {fields_folder}")

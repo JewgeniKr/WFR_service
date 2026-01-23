@@ -5,6 +5,7 @@ import shutil
 import torch
 import torch.nn as nn
 from torchvision import transforms
+from services import db_actions
 
 class PageClassificator(nn.Module):
     def __init__(self):
@@ -91,8 +92,12 @@ class PageValidator:
 
         if predicted_class == 1:
             new_image_path = f'{self.waybills_folder_path}/{file_name}'
+            # сохранение адреса изображения в БД
+            db_actions.save_image(new_image_path, 2)
         else:
             new_image_path = f'{self.other_folder_path}/{file_name}'
+            # сохранение адреса изображения в БД
+            db_actions.save_image(new_image_path, 3)
 
         shutil.move(image_path, new_image_path)
 
@@ -103,9 +108,3 @@ class PageValidator:
                                         transforms.Grayscale(num_output_channels=1)
                                         ])
         return transform
-
-
-
-
-if __name__ == '__main__':
-    pass

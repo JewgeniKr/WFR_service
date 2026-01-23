@@ -3,6 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 from ultralytics import YOLO
+from services import db_actions
 
 # параметры:
 # папка с распознанными полями например (e649e488-008d-4d96-b8f8-08ff2eb58cbf_9/fields)
@@ -49,7 +50,8 @@ class TextBoxesFinder:
 
                 # Сохраняем вырезанный объект
                 cv2.imwrite(save_path, cropped_object)
-                print(f"Сохранено изображение класса '{class_name}' в {save_path}")
 
-if __name__ == '__main__':
-    pass
+                # Сохранение адреса изображения в БД
+                db_actions.save_image(save_path, 5)
+
+                print(f"Сохранено изображение класса '{class_name}' в {save_path}")
