@@ -21,7 +21,6 @@ def root():
 
 @app.route('/waybill/<path:image_path>')
 def get_temp_image(image_path):
-    """Безопасный endpoint для файлов из временной папки"""
     # Заменяем слэши для Windows/Linux совместимости
     safe_path = os.path.join(TEMP_FOLDER, image_path.replace('/', os.sep))
 
@@ -41,7 +40,6 @@ def get_temp_image(image_path):
 
 @app.route('/field_name/<path:image_path>')
 def get_field_image(image_path):
-    """Безопасный endpoint для файлов из временной папки"""
     # Заменяем слэши для Windows/Linux совместимости
     safe_path = os.path.join(TEMP_FOLDER, image_path.replace('/', os.sep))
 

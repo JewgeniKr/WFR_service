@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from run import app as flask_app
+from main import app as flask_app
 
 
 @pytest.fixture
