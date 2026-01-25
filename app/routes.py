@@ -115,6 +115,11 @@ def api_recognize():
         # сохраняем в БД
         db_actions.save_image(file_path, 1)
 
+        doc_parser = document_parsing.DocumentParser(file_path)
+        result = doc_parser.get_text_values()
+
+        return jsonify(result), 200
+
     except Exception as e:
         app.logger.error(f"Error in API endpoint: {str(e)}")
         return jsonify({
