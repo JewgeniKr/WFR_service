@@ -2,6 +2,7 @@ from app import app, db
 from app.config import ProductionConfig
 from sqlalchemy import inspect
 from services.page_validation import PageClassificator
+from services.db_administrations import init_images_types
 
 # Для разработки
 app.config.from_object(ProductionConfig)
@@ -24,5 +25,8 @@ if __name__ == '__main__':
             db.create_all()
         else:
             print("Все таблицы уже существуют")
+
+    # заполнение таблицы первичными данными
+    init_images_types()
 
     app.run(debug=True, port=8080)

@@ -4,7 +4,7 @@ class ImageType(db.Model):
     __tablename__ = 'images_types'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(80), nullable=False, unique=True)
 
     # Связь: один ImageType имеет много Image
     images = db.relationship('Image', backref='type', lazy=True,
