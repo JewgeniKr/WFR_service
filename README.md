@@ -6,9 +6,13 @@
     [Postgres]
 
     user = postgres
+
     host = 127.0.0.1
+
     password = 123
+
     database = waybills_recognition
+
     port = 5432
 
 3) Разархивируйте содержимое архива «models» в корневой каталог приложения
