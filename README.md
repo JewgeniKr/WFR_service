@@ -1,18 +1,15 @@
-1) Перед началом работы системы убедитесь в наличии установленной СУБД PstgreSQL.
+1) Перед началом работы системы убедитесь в наличии установленной СУБД PostgreSQL.
 
-2) В файле «settings.ini» в блоке Postgres укажите свои данные для под-ключения к БД (user, host, password, port, имя БД оставляем без из-менений):
+2) В файле «settings.ini» в блоке Postgres укажите свои данные для подключения к БД (user, host, password, port, имя БД оставляем без изменений):
 
-[Postgres]
 
-user = postgres
+    [Postgres]
 
-host = 127.0.0.1
-
-password = 123
-
-database = waybills_recognition
-
-port = 5432
+    user = postgres
+    host = 127.0.0.1
+    password = 123
+    database = waybills_recognition
+    port = 5432
 
 3) Разархивируйте содержимое архива «models» в корневой каталог приложения
 
